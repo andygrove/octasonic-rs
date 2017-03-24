@@ -76,6 +76,10 @@ impl Octasonic {
         let _ = self.transfer(CMD_SET_SENSOR_COUNT << 4 | n);
     }
 
+    pub fn toggle_led(&self) {
+        let _ = self.transfer(CMD_TOGGLE_LED << 4);
+    }
+
     fn transfer(&self, b: u8) -> u8 {
         let mut transfer = SpidevTransfer::write(&[b]);
         self.spi.transfer(&mut transfer).unwrap();
