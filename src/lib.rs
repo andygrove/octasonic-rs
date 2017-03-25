@@ -12,13 +12,12 @@ const CMD_TOGGLE_LED           : u8 = 0x06;
 
 pub struct Octasonic {
     spi: Spidev,
-    values: Vec<Vec<u8>>
 }
 
 impl Octasonic {
 
     /// Create an Octasonic struct for the specified sensor count
-    pub fn new(sensor_count: usize, sample_count: usize) -> Result<Self, Error> {
+    pub fn new(sensor_count: usize) -> Result<Self, Error> {
         let mut spi = try!(Spidev::open("/dev/spidev0.0"));
         let mut options = SpidevOptions::new();
 
@@ -28,36 +27,11 @@ impl Octasonic {
 
         try!(spi.configure(&options));
 
-        // initialize history for each sensor with readings of 200 cm
-        let mut v = Vec::with_capacity(sensor_count);
-        for _ in 0..sensor_count {
-            v.push(vec![ 200_u8; sensor_count]);
-        }
+        let o = Octasonic { spi: spi };
 
-        let o = Octasonic {
-            spi: spi,
-            values: v
-        };
-
-        o.set_sensor_count(sample_count as u8);
+        o.set_sensor_count(sensor_count as u8);
 
         Ok(o)
-    }
-
-    /// get the averaged sensor reading
-    pub fn get_sensor_reading(&mut self, n: u8) -> u8 {
-        // get the new reading
-        let x = self._get_sensor_reading(n);
-        // push the reading onto the history
-        let mut v = &mut self.values[n as usize];
-        v.remove(0);
-        v.push(x);
-        // calculate the average
-        let mut total = 0_u32;
-        for i in 0..v.len() {
-            total += v[i] as u32;
-        }
-        (total as u32 / v.len() as u32) as u8
     }
 
     pub fn get_sensor_count(&self) -> u8 {
@@ -65,8 +39,7 @@ impl Octasonic {
         self.transfer(0x00)
     }
 
-    /// get the raw sensor reading
-    fn _get_sensor_reading(&self, n: u8) -> u8 {
+    pub fn get_sensor_reading(&self, n: u8) -> u8 {
         let _ = self.transfer(CMD_GET_SENSOR_READING << 4 | n);
         self.transfer(0x00)
     }
