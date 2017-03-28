@@ -2,6 +2,11 @@
 name = "octasonic"
 version = "0.1.0"
 authors = ["Andy Grove <andygrove73@gmail.com>"]
+description = "Rust library for the HC-SR04 Octasonic breakout"
+homepage = "https://github.com/superawesomerobots/octasonic-rs"
+documentation = "https://github.com/superawesomerobots/octasonic-rs"
+repository = "https://github.com/superawesomerobots/octasonic-rs"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 spidev = "0.2.1"
