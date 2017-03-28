@@ -1,6 +1,6 @@
 # octasonic-rs
 
-Rust library for interacting with Octasonic HC-SR04 breakout board over SPI.
+Rust library for interacting with the <a href="https://www.tindie.com/products/andygrove73/octasonic-8-x-hc-sr04-ultrasonic-breakout-board/">Octasonic 8 x HC-SR04 breakout board</a> over SPI.
 
 This code has been tested on a Raspberry Pi 3 Model B running Raspian Jessie and Rust stable 1.16.0
 
@@ -14,6 +14,14 @@ The blink example sends SPI commands to the octasonic board to blink the LED. Th
 
 ```
 cargo run --example blink
+```
+
+## Demo
+
+The `demo` example shows readings from each sensor and shows how to set various parameters on the board.
+
+```
+cargo run --demo
 ```
 
 ## Piano
