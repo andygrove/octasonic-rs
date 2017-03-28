@@ -29,7 +29,7 @@ fn main() {
 
   let max_note_duration = 50;
 
-  let channel = 1; // single channel for now
+  let channel = 55; // single channel for now
 
   loop {
     for i in 0 .. 8 {
