@@ -1,7 +1,7 @@
 extern crate spidev;
 use self::spidev::{Spidev, SpidevOptions, SpidevTransfer, SPI_MODE_0};
 
-use std::io::Error;
+use std::io::{Read, Write, Error};
 
 const CMD_GET_PROTOCOL_VERSION : u8 = 0x01;
 const CMD_SET_SENSOR_COUNT     : u8 = 0x02;
@@ -29,61 +29,52 @@ impl Octasonic {
 
         try!(spi.configure(&options));
 
-        let o = Octasonic { spi: spi };
+        let mut o = Octasonic { spi: spi };
 
         o.set_sensor_count(sensor_count as u8);
 
         Ok(o)
     }
 
-    pub fn get_protocol_version(&self) -> u8 {
+    pub fn get_protocol_version(&mut self) -> u8 {
         self.send_receive(CMD_GET_PROTOCOL_VERSION, 0)
     }
 
-    pub fn get_sensor_count(&self) -> u8 {
+    pub fn get_sensor_count(&mut self) -> u8 {
         self.send_receive(CMD_GET_SENSOR_COUNT, 0)
     }
 
-    pub fn get_sensor_reading(&self, n: u8) -> u8 {
+    pub fn get_sensor_reading(&mut self, n: u8) -> u8 {
         self.send_receive(CMD_GET_SENSOR_READING, n)
     }
 
-    pub fn set_sensor_count(&self, n: u8) {
-        self.send(CMD_SET_SENSOR_COUNT, n)
+    pub fn set_sensor_count(&mut self, n: u8) {
+        let _= self.send_receive(CMD_SET_SENSOR_COUNT, n);
     }
 
-    pub fn set_interval(&self, n: u8) {
-        self.send(CMD_SET_INTERVAL, n)
+    pub fn set_interval(&mut self, n: u8) {
+        let _ = self.send_receive(CMD_SET_INTERVAL, n);
     }
 
-    pub fn set_max_distance(&self, n: u8) {
-        self.send(CMD_SET_MAX_DISTANCE, n )
+    pub fn set_max_distance(&mut self, n: u8) {
+        let _ = self.send_receive(CMD_SET_MAX_DISTANCE, n );
     }
 
-    pub fn get_max_distance(&self) -> u8 {
+    pub fn get_max_distance(&mut self) -> u8 {
         self.send_receive(CMD_GET_MAX_DISTANCE, 0)
     }
 
-    pub fn toggle_led(&self) {
-        self.send(CMD_TOGGLE_LED, 0)
+    pub fn toggle_led(&mut self) {
+        let _ = self.send_receive(CMD_TOGGLE_LED, 0);
     }
 
     /// send a command and read the result byte
-    fn send_receive(&self, cmd: u8, param: u8) -> u8 {
-        let _ = self.transfer(cmd << 4 | param);
-        self.transfer(0x00)
+    fn send_receive(&mut self, cmd: u8, param: u8) -> u8 {
+let b = cmd << 4 | param;
+let mut rx_buf = [0_u8; 1];
+self.spi.write(&[b]).unwrap();
+self.spi.read(&mut rx_buf).unwrap();
+rx_buf[0]
     }
 
-    /// send a single byte containing a command and a parameter
-    fn send(&self, cmd: u8, param: u8) {
-        let _ = self.transfer(cmd << 4 | param);
-    }
-
-    fn transfer(&self, b: u8) -> u8 {
-        let mut transfer = SpidevTransfer::write(&[b]);
-        self.spi.transfer(&mut transfer).unwrap();
-        // println!("Sent: {:?}, Received: {:?}", b, transfer.rx_buf);
-        let b = transfer.rx_buf.unwrap();
-        (*b)[0]
-    }
 }
